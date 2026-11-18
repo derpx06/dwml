@@ -1,0 +1,120 @@
+STEP 1: Shape (rows, columns): (891, 12)
+   PassengerId  Survived  Pclass                   Name     Sex   Age  SibSp  Parch            Ticket     Fare Cabin Embarked
+0            1         0       3  Braund, Mr. Owen H...    male  22.0      1      0         A/5 21171   7.2500   NaN        S
+1            2         1       1  Cumings, Mrs. John...  female  38.0      1      0          PC 17599  71.2833   C85        C
+2            3         1       3  Heikkinen, Miss. L...  female  26.0      0      0  STON/O2. 3101282   7.9250   NaN        S
+3            4         1       1  Futrelle, Mrs. Jac...  female  35.0      1      0            113803  53.1000  C123        S
+4            5         0       3  Allen, Mr. William...    male  35.0      0      0            373450   8.0500   NaN        S
+
+STEP 2: Data types
+PassengerId      int64
+Survived         int64
+Pclass           int64
+Name               str
+Sex                str
+Age            float64
+SibSp            int64
+Parch            int64
+Ticket             str
+Fare           float64
+Cabin              str
+Embarked           str
+
+Variable summary:
+               dtype                       type  unique  missing
+PassengerId    int64                    integer     891        0
+Survived       int64                    integer       2        0
+Pclass         int64                    integer       3        0
+Name             str  character (object/string)     891        0
+Sex              str  character (object/string)       2        0
+Age          float64            numeric (float)      88      177
+SibSp          int64                    integer       7        0
+Parch          int64                    integer       7        0
+Ticket           str  character (object/string)     681        0
+Fare         float64            numeric (float)     248        0
+Cabin            str  character (object/string)     147      687
+Embarked         str  character (object/string)       3        2
+
+Statistical summary (numeric):
+       PassengerId  Survived  Pclass     Age   SibSp   Parch    Fare
+count       891.00    891.00  891.00  714.00  891.00  891.00  891.00
+mean        446.00      0.38    2.31   29.70    0.52    0.38   32.20
+std         257.35      0.49    0.84   14.53    1.10    0.81   49.69
+min           1.00      0.00    1.00    0.42    0.00    0.00    0.00
+25%         223.50      0.00    2.00   20.12    0.00    0.00    7.91
+50%         446.00      0.00    3.00   28.00    0.00    0.00   14.45
+75%         668.50      1.00    3.00   38.00    1.00    0.00   31.00
+max         891.00      1.00    3.00   80.00    8.00    6.00  512.33
+
+STEP 3: Missing values
+          missing  percent
+Cabin         687    77.10
+Age           177    19.87
+Embarked        2     0.22
+
+STEP 4: Handling missing values
+Median age by Pclass & Sex:
+Pclass  Sex   
+1       female    35.0
+        male      40.0
+2       female    28.0
+        male      30.0
+3       female    21.5
+        male      25.0
+Embarked mode used: S
+Missing values after cleaning: 0
+
+STEP 5: Duplicate rows: 0
+
+STEP 6: Type conversion
+            new dtype                       type
+PassengerId       str  character (object/string)
+Survived         bool                    logical
+Pclass       category          factor (category)
+Name              str  character (object/string)
+Sex          category          factor (category)
+Age           float64            numeric (float)
+SibSp           int64                    integer
+Parch           int64                    integer
+Ticket            str  character (object/string)
+Fare          float64            numeric (float)
+Embarked     category          factor (category)
+HasCabin        int64                    integer
+Title        category          factor (category)
+
+Title counts:
+Title
+Mr        517
+Miss      185
+Mrs       126
+Master     40
+Rare       23
+
+STEP 7: Fare Q1=7.91 Q3=31.00 IQR=23.09 -> bounds [-26.72, 65.63], outliers=116
+
+STEP 8: Normalization (decimal scaling uses j=3)
+         Age  Age_minmax     Fare  Fare_zscore  Fare_decimal  Fare_log
+mean  29.112       0.361   32.204        0.000         0.032     2.962
+std   13.304       0.167   49.693        1.001         0.050     0.969
+min    0.420       0.000    0.000       -0.648         0.000     0.000
+max   80.000       1.000  512.329        9.667         0.512     6.241
+
+STEP 9: Encoded columns
+   Sex_code  Pclass_num  Emb_C  Emb_Q  Emb_S  T_Master  T_Miss  T_Mr  T_Mrs  T_Rare
+0         1           3      0      0      1         0       0     1      0       0
+1         0           1      1      0      0         0       0     0      1       0
+2         0           3      0      0      1         0       1     0      0       0
+3         0           1      0      0      1         0       0     0      1       0
+4         1           3      0      0      1         0       0     1      0       0
+
+STEP 10: Correlation with Survived:
+Survived_num    1.00
+HasCabin        0.32
+Fare            0.26
+Parch           0.08
+SibSp          -0.04
+Age            -0.06
+Pclass_num     -0.34
+Sex_code       -0.54
+
+STEP 11: Final shape: (891, 21) | saved out/titanic_clean.csv

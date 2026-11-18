@@ -1,0 +1,133 @@
+SOURCE: raw rows = 1210
+ bill_no  bill_date store_id      store_name      city       state region product_id product_name category customer_segment  qty  unit_price  margin
+    1000 06-03-2024       S5        Delhi CP     Delhi       Delhi  North         P6     Rice 5kg  Grocery          Premium  4.0      468.15    0.08
+    1001 19-07-2025       S2  Mumbai Andheri   Mumbai  Maharashtra   West         P6     Rice 5kg  Grocery          Regular  7.0      466.51    0.08
+    1002 23-04-2025       S3 Bengaluru MG Rd Bengaluru   Karnataka  South         P4        Jeans Clothing          Premium  6.0     1809.56    0.40
+
+ETL LOG:
+  extracted                     : 1210
+  after removing duplicates     : 1200
+  after dropping missing qty    : 1192
+  cities after cleaning          : ['Bengaluru', 'Chennai', 'Delhi', 'Mumbai', 'Pune']
+
+LOADED SALES DATA MART (star schema):
+  dim_time      rows = 579
+  dim_product   rows = 7
+  dim_store     rows = 5
+  dim_customer  rows = 3
+  fact_sales    rows = 1192
+ store_key store_id      store_name      city       state region
+         1       S1    Pune Central      Pune Maharashtra   West
+         2       S2  Mumbai Andheri    Mumbai Maharashtra   West
+         3       S3 Bengaluru MG Rd Bengaluru   Karnataka  South
+         4       S4 Chennai T Nagar   Chennai  Tamil Nadu  South
+         5       S5        Delhi CP     Delhi       Delhi  North
+
+DATA CUBE view: sales (Rs lakh) by Location x Time
+year              2024                    2025                  
+quarter             Q1    Q2    Q3    Q4    Q1    Q2    Q3    Q4
+region city                                                     
+North  Delhi      3.64  6.90  4.35  2.53  3.52  2.38  5.75  5.25
+South  Bengaluru  2.83  5.84  3.97  3.97  3.68  5.03  4.90  2.55
+       Chennai    5.38  2.40  1.82  5.25  2.47  1.81  3.66  4.34
+West   Mumbai     5.10  2.89  3.51  3.43  6.29  2.48  8.91  2.60
+       Pune       2.77  2.40  4.73  3.09  4.11  4.16  5.12  3.74
+
+(1) ROLL-UP  city -> region, quarter -> year  (SQL)
+region  year  sales_lakh
+ North  2024       17.42
+ North  2025       16.90
+ South  2024       31.46
+ South  2025       28.45
+  West  2024       27.92
+  West  2025       37.41
+
+    ROLL-UP with sub-totals (ROLLUP emulated with UNION ALL - SQLite has no ROLLUP)
+region      city  sales_lakh
+   ALL       ALL      159.55
+ North       ALL       34.32
+ North     Delhi       34.32
+ South       ALL       59.90
+ South Bengaluru       32.78
+ South   Chennai       27.13
+  West       ALL       65.32
+  West    Mumbai       35.21
+  West      Pune       30.11
+
+(2) DRILL-DOWN  year -> quarter -> month for 2025, category = Electronics
+quarter month_name  sales_lakh
+     Q1        Jan        4.82
+     Q1        Feb        6.10
+     Q1        Mar        5.72
+     Q2        Apr        5.70
+     Q2        May        4.63
+     Q2        Jun        2.59
+     Q3        Jul        8.15
+     Q3        Aug        6.13
+     Q3        Sep       10.42
+     Q4        Oct        3.17
+     Q4        Nov       10.37
+     Q4        Dec        2.38
+
+(3) SLICE  Time = 2025-Q1 (one dimension fixed)  -> Location x Product
+category   Clothing  Electronics  Grocery
+city                                     
+Bengaluru      77.5        278.6     11.4
+Chennai        24.7        199.9     22.9
+Delhi          52.6        294.4      4.9
+Mumbai         58.9        559.5     10.8
+Pune           68.8        331.8     10.3
+
+(4) DICE  city IN (Pune, Mumbai) AND quarter IN (Q1, Q2) AND category IN (Electronics, Clothing)
+ year quarter   city    category  units  sales_thousand
+ 2024      Q1 Mumbai    Clothing     43            63.7
+ 2024      Q1 Mumbai Electronics     27           441.0
+ 2024      Q1   Pune    Clothing     30            36.5
+ 2024      Q1   Pune Electronics     23           223.9
+ 2024      Q2 Mumbai    Clothing     37            38.2
+ 2024      Q2 Mumbai Electronics     22           243.2
+ 2024      Q2   Pune    Clothing     36            31.0
+ 2024      Q2   Pune Electronics     16           202.2
+ 2025      Q1 Mumbai    Clothing     39            58.9
+ 2025      Q1 Mumbai Electronics     24           559.5
+ 2025      Q1   Pune    Clothing     44            68.8
+ 2025      Q1   Pune Electronics     24           331.8
+ 2025      Q2 Mumbai    Clothing     50            49.4
+ 2025      Q2 Mumbai Electronics     19           181.7
+ 2025      Q2   Pune    Clothing     42            49.1
+ 2025      Q2   Pune Electronics     16           360.7
+
+(5) PIVOT  rows = category, columns = region  (then rotated)
+region       North  South   West
+category                        
+Clothing      3.36   8.24   7.62
+Electronics  30.13  49.79  55.82
+Grocery       0.83   1.88   1.88
+
+Rotated (rows = region, columns = category):
+category  Clothing  Electronics  Grocery
+region                                  
+North         3.36        30.13     0.83
+South         8.24        49.79     1.88
+West          7.62        55.82     1.88
+
+Q1. Top 3 products by profit
+product_name  profit_thousand
+      Laptop            773.1
+  Smartphone            613.6
+       Jeans            572.9
+
+Q2. Year-on-year growth by region
+         2024   2025  growth_%
+region                        
+North   17.42  16.90      -2.9
+South   31.46  28.45      -9.6
+West    27.92  37.41      34.0
+
+Q3. Share of sales by customer segment
+segment  share_%
+    New     14.8
+Premium     25.4
+Regular     59.7
+
+Data mart saved to data/sales_mart.db

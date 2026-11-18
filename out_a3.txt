@@ -1,0 +1,103 @@
+Transactions = 10, min_support = 40% -> min count = 4, min_conf = 60%
+order_id                                                        books
+      T1            Clean Code, Pragmatic Programmer, Design Patterns
+      T2            Clean Code, Pragmatic Programmer, Design Patterns
+      T3                             Atomic Habits, Deep Work, Ikigai
+      T4 Clean Code, Pragmatic Programmer, Design Patterns, Deep Work
+      T5                         Atomic Habits, Deep Work, Clean Code
+      T6                                  Clean Code, Design Patterns
+      T7                         Atomic Habits, Deep Work, Clean Code
+      T8            Clean Code, Pragmatic Programmer, Design Patterns
+      T9                                        Atomic Habits, Ikigai
+     T10               Atomic Habits, Deep Work, Pragmatic Programmer
+
+C1 (candidates with support count):
+   {Atomic Habits}                                              5  kept
+   {Clean Code}                                                 7  kept
+   {Deep Work}                                                  5  kept
+   {Design Patterns}                                            5  kept
+   {Ikigai}                                                     2  removed
+   {Pragmatic Programmer}                                       5  kept
+L1: {Atomic Habits}:5, {Clean Code}:7, {Deep Work}:5, {Design Patterns}:5, {Pragmatic Programmer}:5
+
+C2 (candidates with support count):
+   {Atomic Habits, Clean Code}                                  2  removed
+   {Atomic Habits, Deep Work}                                   4  kept
+   {Atomic Habits, Design Patterns}                             0  removed
+   {Atomic Habits, Pragmatic Programmer}                        1  removed
+   {Clean Code, Deep Work}                                      3  removed
+   {Clean Code, Design Patterns}                                5  kept
+   {Clean Code, Pragmatic Programmer}                           4  kept
+   {Deep Work, Design Patterns}                                 1  removed
+   {Deep Work, Pragmatic Programmer}                            2  removed
+   {Design Patterns, Pragmatic Programmer}                      4  kept
+L2: {Atomic Habits, Deep Work}:4, {Clean Code, Design Patterns}:5, {Clean Code, Pragmatic Programmer}:4, {Design Patterns, Pragmatic Programmer}:4
+
+C3 (candidates with support count):
+   {Clean Code, Design Patterns, Pragmatic Programmer}          4  kept
+L3: {Clean Code, Design Patterns, Pragmatic Programmer}:4
+
+ALL CANDIDATE RULES:
+                             antecedent                              consequent  support  confidence  lift  strong
+     {Clean Code, Pragmatic Programmer}                       {Design Patterns}      0.4       1.000 2.000    True
+                      {Design Patterns}                            {Clean Code}      0.5       1.000 1.429    True
+{Design Patterns, Pragmatic Programmer}                            {Clean Code}      0.4       1.000 1.429    True
+                      {Design Patterns}      {Clean Code, Pragmatic Programmer}      0.4       0.800 2.000    True
+                        {Atomic Habits}                             {Deep Work}      0.4       0.800 1.600    True
+                            {Deep Work}                         {Atomic Habits}      0.4       0.800 1.600    True
+                      {Design Patterns}                  {Pragmatic Programmer}      0.4       0.800 1.600    True
+                 {Pragmatic Programmer}                       {Design Patterns}      0.4       0.800 1.600    True
+                 {Pragmatic Programmer}           {Clean Code, Design Patterns}      0.4       0.800 1.600    True
+          {Clean Code, Design Patterns}                  {Pragmatic Programmer}      0.4       0.800 1.600    True
+                 {Pragmatic Programmer}                            {Clean Code}      0.4       0.800 1.143    True
+                           {Clean Code}                       {Design Patterns}      0.5       0.714 1.429    True
+                           {Clean Code} {Design Patterns, Pragmatic Programmer}      0.4       0.571 1.429   False
+                           {Clean Code}                  {Pragmatic Programmer}      0.4       0.571 1.143   False
+
+STRONG RULES (confidence >= 60%): 12 of 14
+
+One-hot (basket) matrix:
+   Atomic  Clean  Deep  Design  Ikigai  Pragmatic
+0       0      1     0       1       0          1
+1       0      1     0       1       0          1
+2       1      0     1       0       1          0
+3       0      1     1       1       0          1
+4       1      1     1       0       0          0
+5       0      1     0       1       0          0
+6       1      1     1       0       0          0
+7       0      1     0       1       0          1
+8       1      0     0       0       1          0
+9       1      0     1       0       0          1
+
+Frequent itemsets (mlxtend):
+ support                                            itemsets  length
+     0.7                                        {Clean Code}       1
+     0.5                                     {Atomic Habits}       1
+     0.5                                         {Deep Work}       1
+     0.5                                   {Design Patterns}       1
+     0.5                              {Pragmatic Programmer}       1
+     0.5                       {Clean Code, Design Patterns}       2
+     0.4                          {Atomic Habits, Deep Work}       2
+     0.4                  {Clean Code, Pragmatic Programmer}       2
+     0.4             {Design Patterns, Pragmatic Programmer}       2
+     0.4 {Clean Code, Design Patterns, Pragmatic Programmer}       3
+
+Association rules (mlxtend):
+                            antecedents                        consequents  support  confidence  lift
+     {Clean Code, Pragmatic Programmer}                  {Design Patterns}      0.4       1.000 2.000
+                      {Design Patterns}                       {Clean Code}      0.5       1.000 1.429
+{Design Patterns, Pragmatic Programmer}                       {Clean Code}      0.4       1.000 1.429
+                      {Design Patterns} {Clean Code, Pragmatic Programmer}      0.4       0.800 2.000
+                        {Atomic Habits}                        {Deep Work}      0.4       0.800 1.600
+                            {Deep Work}                    {Atomic Habits}      0.4       0.800 1.600
+                      {Design Patterns}             {Pragmatic Programmer}      0.4       0.800 1.600
+                 {Pragmatic Programmer}                  {Design Patterns}      0.4       0.800 1.600
+          {Clean Code, Design Patterns}             {Pragmatic Programmer}      0.4       0.800 1.600
+                 {Pragmatic Programmer}      {Clean Code, Design Patterns}      0.4       0.800 1.600
+                 {Pragmatic Programmer}                       {Clean Code}      0.4       0.800 1.143
+                           {Clean Code}                  {Design Patterns}      0.5       0.714 1.429
+
+RECOMMENDATIONS
+  Customer buys 'Clean Code'           -> recommend [('{Design Patterns}', 0.71)]
+  Customer buys 'Atomic Habits'        -> recommend [('{Deep Work}', 0.8)]
+  Customer buys 'Design Patterns'      -> recommend [('{Clean Code}', 1.0), ('{Clean Code, Pragmatic Programmer}', 0.8), ('{Pragmatic Programmer}', 0.8)]

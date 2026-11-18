@@ -1,0 +1,79 @@
+Shape: (1000, 8)
+applicant_id   income  credit_score employment_status  loan_amount  loan_term past_default  approved
+       A1000 185000.0         727.0     Self-Employed     592000.0         36           No         1
+       A1001 279000.0         626.0     Self-Employed     687000.0         60           No         0
+       A1002 859000.0         666.0     Self-Employed    1597000.0         36           No         1
+       A1003 910000.0         865.0          Salaried    2973000.0         24           No         1
+       A1004 819000.0         599.0          Salaried    3092000.0        240          Yes         0
+
+Missing values:
+income               15
+credit_score         20
+employment_status    10
+
+Class balance (approved):
+approved
+Approved (1)    650
+Rejected (0)    350
+
+Approval rate by employment:
+employment_status
+Salaried         0.71
+Self-Employed    0.63
+Unemployed       0.33
+Approval rate by past default:
+past_default
+No     0.71
+Yes    0.34
+
+Train = 750 rows, Test = 250 rows (75/25 stratified split)
+
+MODEL COMPARISON (test set + 5-fold cross-validation):
+        Model  Accuracy  Precision  Recall    F1  ROC-AUC  CV-5 mean  CV-5 std
+    SVM (RBF)     0.880      0.898   0.920 0.909    0.962      0.874     0.018
+    KNN (k=7)     0.856      0.862   0.926 0.893    0.933      0.858     0.017
+Decision Tree     0.856      0.866   0.920 0.892    0.893      0.831     0.023
+  Naive Bayes     0.780      0.786   0.907 0.842    0.819      0.757     0.052
+  Decision Tree  TN= 65 FP= 23 FN= 13 TP=149
+  Naive Bayes    TN= 48 FP= 40 FN= 15 TP=147
+  KNN (k=7)      TN= 64 FP= 24 FN= 12 TP=150
+  SVM (RBF)      TN= 71 FP= 17 FN= 13 TP=149
+
+Best model by F1: SVM (RBF)
+              precision    recall  f1-score   support
+
+    Rejected       0.85      0.81      0.83        88
+    Approved       0.90      0.92      0.91       162
+
+    accuracy                           0.88       250
+   macro avg       0.87      0.86      0.87       250
+weighted avg       0.88      0.88      0.88       250
+
+Decision tree (first levels):
+|--- emi_to_income <= 0.39
+|   |--- credit_score <= 574.50
+|   |   |--- credit_score <= 533.50
+|   |   |   |--- class: 0
+|   |   |--- credit_score >  533.50
+|   |   |   |--- class: 1
+|   |--- credit_score >  574.50
+|   |   |--- past_default_Yes <= 0.50
+|   |   |   |--- truncated branch of depth 2
+|   |   |--- past_default_Yes >  0.50
+|   |   |   |--- truncated branch of depth 2
+|--- emi_to_income >  0.39
+|   |--- credit_score <= 704.50
+|   |   |--- credit_score <= 637.50
+|   |   |   |--- truncated branch of depth 2
+|   |   |--- credit_score >  637.50
+
+Feature importance (Decision Tree):
+credit_score                    0.461
+emi_to_income                   0.326
+past_default_Yes                0.112
+employment_status_Unemployed    0.063
+income                          0.038
+  Decision Tree  -> applicant 1: Approved (0.98), applicant 2: Rejected (0.00)
+  Naive Bayes    -> applicant 1: Approved (0.83), applicant 2: Rejected (0.29)
+  KNN (k=7)      -> applicant 1: Approved (1.00), applicant 2: Rejected (0.00)
+  SVM (RBF)      -> applicant 1: Approved (1.00), applicant 2: Rejected (0.00)

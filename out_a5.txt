@@ -1,0 +1,61 @@
+Shape: (200, 5)
+ CustomerID Gender  Annual_Income_k  Spending_Score  Age
+          1 Female             37.0            27.0 46.0
+          2   Male             35.0             9.0 54.0
+          3 Female             26.0            74.0 18.0
+          4   Male             67.0            47.0 44.0
+          5   Male             79.0            27.0 51.0
+
+Summary:
+      CustomerID  Annual_Income_k  Spending_Score   Age
+mean       100.5             55.8            49.8  39.3
+std         57.9             26.4            26.1  11.0
+min          1.0             15.0             1.0  18.0
+max        200.0            107.0            99.0  65.0
+
+k   WCSS     silhouette
+1     400.00  nan
+2     250.44  0.390
+3     151.73  0.496
+4      84.84  0.558
+5      33.50  0.657
+6      29.69  0.615
+7      26.38  0.516
+8      23.72  0.463
+9      21.54  0.427
+10     19.45  0.421
+Best k by silhouette = 5
+
+K-MEANS CLUSTER PROFILE:
+        customers  income  score   age                                                    segment
+KMeans                                                                                           
+0              34    88.4   82.4  33.9   Premium (rich, spends a lot) - target with luxury offers
+1              35    27.3   20.8  46.8               Budget (low income, low spend) - value packs
+2              30    89.0   16.6  43.3         Careful rich (earns a lot, spends little) - upsell
+3              35    25.6   75.8  26.0    Young spenders (low income, high spend) - discounts/EMI
+4              66    55.1   49.6  43.2  Average (medium income, medium spend) - loyalty programme
+
+Centroids (original units):
+   Annual_Income_k  Spending_Score
+0             88.4            82.4
+1             27.3            20.8
+2             89.0            16.6
+3             25.6            75.8
+4             55.1            49.6
+
+DBSCAN: eps=0.35, min_samples=5 -> 5 clusters, 4 noise points
+
+COMPARISON:
+   Algorithm  clusters  noise  Silhouette (higher better)  Davies-Bouldin (lower better)
+      KMeans         5      0                       0.657                          0.442
+Hierarchical         5      0                       0.657                          0.442
+      DBSCAN         5      4                       0.665                          0.433
+
+Agreement K-Means vs Hierarchical (crosstab):
+Hierarchical   0   1   2   3   4
+KMeans                          
+0              0   0  34   0   0
+1              0   0   0  35   0
+2              0   0   0   0  30
+3              0  35   0   0   0
+4             66   0   0   0   0
